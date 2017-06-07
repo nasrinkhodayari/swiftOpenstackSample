@@ -1,0 +1,66 @@
+<html>
+
+<head>
+    <title>This is my curlTest</title>
+    <script src="jquery-1.11.1.min.js"></script>
+    <script src="fileSaver.js"></script>
+</head>
+
+<body>
+
+    <br> <br> URL
+    <br><input id="url" type="text" value="http://192.168.88.30"><br> <br>
+    <br> PORT
+    <br><input id="port" type="text" value="5000"><br> <br>
+    <br> Auth version
+    <br><input id="authv" type="text" value="v3/auth/tokens">
+
+    <br> <br> User
+    <br><input id="user" type="text" value="swiftuser">
+    <br> <br> Password
+    <br><input id="password" type="text" value="123a123A">
+    <br>
+    <button onclick="getTocken()">submit</button>
+    <div id="msgBox"></div>
+    <!--<a href="javascript:void(0)" onclick="doDownload()" id="dlbtn"><button>click here to download your file</button></a>-->
+    <div id="some_container_div"></div>
+
+    <hr>
+    <pre id="response_headers"></pre>
+    <p>
+        <hr>
+        <pre id="response_body"></pre>
+</body>
+<script type="text/javascript">
+    function getTocken() {
+        debugger
+        var pass = document.getElementById('password').value;
+        var user = document.getElementById('user').value;
+
+        var url = document.getElementById('url').value + ':' +
+            document.getElementById('port').value +
+            '/' + document.getElementById('authv').value
+
+        console.log(url);
+        var xhrObj = new XMLHttpRequest();
+
+        xhrObj.open("GET", url, true);
+
+        xhrObj.setRequestHeader('X-Storage-User', user);
+        xhrObj.setRequestHeader('X-Storage-Pass', pass);
+
+        xhrObj.onreadystatechange = function (oEvent) {
+            if (xhrObj.readyState == 4) {
+                responseHeaders = 'Status: ' + xhrObj.status;
+                responseHeaders = responseHeaders + '\nStatus Text: ' + xhrObj.statusText;
+                responseHeaders = responseHeaders + '\n\n' + xhrObj.getAllResponseHeaders();
+                document.getElementById('response_headers').textContent = responseHeaders;
+                document.getElementById('response_body').textContent = xhrObj.responseText;
+            }
+        }
+        xhrObj.send(null);
+    }
+
+</script>
+
+</html>

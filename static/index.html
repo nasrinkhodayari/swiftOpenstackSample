@@ -1,0 +1,99 @@
+<html>
+
+<head>
+    <title>This is my curlTest</title>
+    <script src="jquery-1.11.1.min.js"></script>
+</head>
+
+<body>
+    <a href="index2.html" target="_blank" style="color: Green;background-color: yellow;">Container Files List</a>
+    <br> Token
+    <br><input id="token" type="text" size="64" value="AUTH_tk90dd8ea13b2a4f8cb7af2dbc4d5a0860">
+    <br> <br> URL
+    <br><input id="url" type="text" value="http://192.168.88.30"><br> <br>
+    <br> PORT
+    <br><input id="port" type="text" value="8080"><br> <br>
+    <br> Auth version
+    <br><input id="authv" disabled type="text" value="v1"><br> <br>
+    <br> User Name
+    <br><input id="uName" type="text" value="AUTH_salmanaccount"><br> <br>
+    <br> Continer
+    <br><input id="container" type="text" value="videos">
+    <br> <br>
+    <br> File Name
+    <br><input id="fileName" type="text" value="" placeholder="name.mp4">
+    <br> <br>
+    <input type="file" id="fileToUpload" />
+    <br> <br> Progress
+    <br> <input id="percentageCalc" disabled>
+    <br> <br>
+    <div id="msgBox"></div>
+    <!--<a href="javascript:void(0)" onclick="doDownload()" id="dlbtn"><button>click here to download your file</button></a>-->
+    <div id="some_container_div"></div>
+
+    <hr>
+    <pre id="response_headers"></pre>
+    <p>
+        <hr>
+        <pre id="response_body"></pre>
+</body>
+<script type="text/javascript">
+    function uploadFile(file) {
+        var token = document.getElementById('token').value;
+        var url = document.getElementById('url').value + ':' +
+            document.getElementById('port').value +
+            '/' + document.getElementById('authv').value +
+            '/' + document.getElementById('uName').value +
+            '/' + document.getElementById('container').value
+        if (document.getElementById('fileName').value !== '')
+            url += '/' + document.getElementById('fileName').value;
+        else
+            url += '/' + file.name;
+        console.log(url);
+        var xhrObj = new XMLHttpRequest();
+        xhrObj.upload.addEventListener("loadstart", loadStartFunction, false);
+        xhrObj.upload.addEventListener("progress", progressFunction, false);
+        xhrObj.upload.addEventListener("load", transferCompleteFunction, false);
+        xhrObj.open("PUT", url, true);
+        xhrObj.setRequestHeader("Content-type", file.type);
+        xhrObj.setRequestHeader('X-Auth-Token', token);
+        xhrObj.onreadystatechange = function (oEvent) {
+            if (xhrObj.readyState == 4) {
+                responseHeaders = 'Status: ' + xhrObj.status;
+                responseHeaders = responseHeaders + '\nStatus Text: ' + xhrObj.statusText;
+                responseHeaders = responseHeaders + '\n\n' + xhrObj.getAllResponseHeaders();
+                document.getElementById('response_headers').textContent = responseHeaders;
+                document.getElementById('response_body').textContent = xhrObj.responseText;
+            }
+        }
+        xhrObj.send(file);
+    }
+
+
+    $("#fileToUpload").bind("change", function (changeEvent) {
+        var fr = new FileReader();
+        fr.onload = (function (file_object, input_file_node) {
+            if (changeEvent.target.files[0]) {
+                uploadFile(changeEvent.target.files[0]);
+            }
+        });
+        fr.readAsArrayBuffer(changeEvent.target.files[0]);
+    });
+
+    function loadStartFunction() {
+        console.log('loadstart');
+    }
+    function progressFunction(evt) {
+        var percentageDiv = document.getElementById("percentageCalc");
+        if (evt.lengthComputable) {
+            percentageDiv.value = Math.round(evt.loaded / evt.total * 100) + "%";
+        }
+    }
+    function transferCompleteFunction() {
+        console.log('load');
+    }
+
+
+</script>
+
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test Swift CORS</title>
+    <!-- Only using jQuery for jQuery.parseJSON -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+  </head>
+  <body>
+  
+    <div style="border: thin solid grey; padding-left: 10px; width: 50%; margin-left: auto; margin-right: auto">
+      <h2>Authentication</h2>
+
+      <p>
+        User:<br>
+        <input id="userid" type="text" value="salmanaccount:salman">
+      </p>
+    
+      <p>
+        Password:<br>
+        <input id="password" type="text" value="123a123A">
+        </p>
+
+      <p>
+        Auth URL:<br>
+        <input id="auth_url" type="text" size="48" value="http://192.168.88.30:8080/v1/AUTH_salmanaccount">
+      </p>
+
+      <p>
+        <input id="auth" type="button" value="Authenticate" onclick="authenticate()">
+      </p>
+    </div>
+
+    <br>
+
+    <div style="border: thin solid grey; padding-left: 10px; width: 50%; margin-left: auto; margin-right: auto">
+      <h2>Authentication Results</h2>
+
+      <p>
+        <b>Result</b>: <span id="auth_result"></span>
+      </p>
+
+      <div id="auth-headers" style="margin-bottom: 10px">
+        <b>Token</b>: <span id="auth_token"></span><br>
+        <b>Storage URL</b>: <span id="service_url"></span>
+      </div>
+
+      <p>
+        <input id="get_buckets" type="button" value="Get Buckets" onclick="getBuckets()" disabled="true">
+      </p>
+
+    </div>
+
+    <br>
+
+    <div style="border: thin solid grey; padding-left: 10px; width: 50%; margin-left: auto; margin-right: auto">
+      <h2>Buckets</h2>
+
+      <ul id="buckets">
+      </ul>
+
+    </div>
+
+    <script type="text/javascript">
+      var service_url;
+      var auth_token;
+      function authenticate() {
+          var userid = document.getElementById('userid').value
+          var password = document.getElementById('password').value
+          var auth_url = document.getElementById('auth_url').value
+          var request = new XMLHttpRequest();
+          request.open('GET', auth_url);
+          request.setRequestHeader('X-Storage-User', userid);
+          request.setRequestHeader('X-Storage-Pass', password);
+          request.onreadystatechange = function (oEvent) {
+              if (request.readyState === 4) {  
+                  auth_result_elem = document.getElementById('auth_result')
+                  
+                  if (request.status === 200) {
+                      auth_result_elem.innerHTML = 'Successful';
+                      auth_result_elem.style.color = 'green';
+                      auth_token = request.getResponseHeader('X-Auth-Token')
+                      auth_token_elem = document.getElementById('auth_token')
+                      if (auth_token != null) {
+                          auth_token_elem.innerHTML = auth_token
+                          auth_token_elem.style.color = 'green';
+                      } else {
+                          auth_token_elem.innerHTML = "Either the header wasn't returned or the browser can't read it."
+                          auth_token_elem.style.color = 'red';
+                      }
+                      service_url = request.getResponseHeader('X-Storage-Url')
+                      service_url_elem = document.getElementById('service_url')
+                      if (service_url != null) {
+                          service_url_elem.innerHTML = service_url
+                          service_url_elem.style.color = 'green';
+                      } else {
+                          service_url_elem.innerHTML = "Either the header wasn't returned or the browser can't read it."
+                          service_url_elem.style.color = 'red';
+                      }
+                      document.getElementById('get_buckets').disabled = false;
+                  } else {
+                      auth_result_elem.innerHTML = 'Failed ' + request.responseText;
+                      auth_result_elem.style.color = 'red';
+                  }
+              }  
+          };
+          request.send(null);
+      };
+      function getBuckets() {
+          var request = new XMLHttpRequest();
+          request.open('GET', service_url + "?format=json");
+          request.setRequestHeader('X-Auth-Token', auth_token);
+          request.onreadystatechange = function (oEvent) {
+              if (request.readyState === 4) {
+                  if (request.status === 200) {
+                      // clear bucket list
+                      var ul = document.getElementById('buckets')
+                      while (ul.childNodes.length >= 1) {
+                          ul.removeChild(ul.firstChild);
+                      }
+                      // populate the list of buckets
+                      var buckets = jQuery.parseJSON(request.responseText)
+                      for (var i = 0; i < buckets.length; i++) {
+                          var bucket = buckets[i];
+                          var li = document.createElement('li');
+                          li.innerHTML = bucket.name + ", " + bucket.count + ", " + bucket.bytes;
+                          ul.appendChild(li);
+                      }
+                  }
+              }
+          };
+          request.send(null);
+      };
+    </script>
+  </body>
+</html>
