@@ -7,13 +7,12 @@
 </head>
 
 <body>
-
     <br> <br> URL
     <br><input id="url" type="text" value="http://192.168.88.30"><br> <br>
     <br> PORT
     <br><input id="port" type="text" value="5000"><br> <br>
     <br> Auth version
-    <br><input id="authv" type="text" value="v3/auth/tokens">
+    <br><input id="authv" type="text" value="v2.0/tokens">
 
     <br> <br> Project
     <br><input id="proj" type="text" value="swiftproject">
@@ -26,7 +25,6 @@
     <div id="msgBox"></div>
     <!--<a href="javascript:void(0)" onclick="doDownload()" id="dlbtn"><button>click here to download your file</button></a>-->
     <div id="some_container_div"></div>
-
     <hr>
     <pre id="response_headers"></pre>
     <p>
@@ -43,40 +41,79 @@
             document.getElementById('port').value +
             '/' + document.getElementById('authv').value;
         console.log(url);
-        var dataString = '\
-                        { "auth": {\
-                            "identity": {\
-                            "methods": ["password"],\
-                            "password": {\
-                                "user": {\
-                                "name": "'+ user + '",\
-                                "domain": { "id": "default" },\
-                                "password": "'+ pass + '"\
-                                }\
-                            }\
-                        }\
-                          ,"scope": {\
-                        "project": {\
-                            "name": "'+ proj + '",\
-                                 "domain": { "id": "default" }\
-                            }\
-                            }\
-                        }\
-                        }';
 
 
-        $.ajax({
-            url: url,
-            type: 'POST',
-            data: dataString,
-            contentType: "application/json",
-            success: function (response) {
-                console.log(response);
-            },
-            failure: function (msg) {
-                console.error(msg);
-            }
-        });
+        var self = this;
+        var payload = '{"auth":{"tenantName": "swiftproject", "passwordCredentials": {"username": "swiftuser", "password": "123a123A"}}}';
+
+
+        var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
+        xmlhttp.open("POST", url);
+        xmlhttp.setRequestHeader("Content-Type", "application/json");
+        xmlhttp.onreadystatechange = function (oEvent) {
+            debugger
+            if (xmlhttp.readyState === 4) { }
+        }
+        xmlhttp.send(payload);
+
+
+        // $.ajax({
+        //     url: url,
+        //     type: 'POST',
+        //     body: payload,
+        //     contentType: "application/json",
+        //     success: function (response) {
+        //         debugger
+        //         console.log(response);
+        //     },
+        //     failure: function (msg) {
+        //         console.error(msg);
+        //     }
+        // });
+        // var req = this._$http.post(swiftAuth.authUrl, payload);
+        // return req.then(function (result) {
+        //     self._headers['X-Auth-Token'] = result.data.access.token.id;
+        //     result.data.access.serviceCatalog.some(function (service) {
+        //         if (service.name == 'swift') {
+        //             self._swiftUrl = service.endpoints[0].publicURL;
+        //             return true;  // break loop
+        //         }
+        //     });
+        //     return self._headers;
+        // });
+
+        // var dataString = '\
+        //                 { "auth": {\
+        //                     "identity": {\
+        //                     "methods": ["password"],\
+        //                     "password": {\
+        //                         "user": {\
+        //                         "name": "'+ user + '",\
+        //                         "domain": { "id": "default" },\
+        //                         "password": "'+ pass + '"\
+        //                         }\
+        //                     }\
+        //                 }\
+        //                   ,"scope": {\
+        //                 "project": {\
+        //                     "name": "'+ proj + '",\
+        //                          "domain": { "id": "default" }\
+        //                     }\
+        //                     }\
+        //                 }\
+        //                 }';
+        // $.ajax({
+        //     url: url,
+        //     type: 'POST',
+        //     data: dataString,
+        //     contentType: "application/json",
+        //     success: function (response) {
+        //         console.log(response);
+        //     },
+        //     failure: function (msg) {
+        //         console.error(msg);
+        //     }
+        // });
     }
 
 </script>

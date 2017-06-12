@@ -3,30 +3,116 @@
 <head>
     <title>This is my curlTest</title>
     <script src="jquery-1.11.1.min.js"></script>
+    <script src="fileSaver.js"></script>
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            /*width: 100%;*/
+            height: 50px;
+            overflow: scroll
+        }
+
+        td,
+        th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+
+        video {
+            width: 480px;
+            height: 360px;
+        }
+    </style>
 </head>
 
 <body>
-    <a href="index2.html" target="_blank" style="color: Green;background-color: yellow;">Container Files List</a>
-    <br> Token
-    <br><input id="token" type="text" size="64" value="AUTH_tk90dd8ea13b2a4f8cb7af2dbc4d5a0860">
-    <br> <br> URL
-    <br><input id="url" type="text" value="http://192.168.88.30"><br> <br>
-    <br> PORT
-    <br><input id="port" type="text" value="8080"><br> <br>
-    <br> Auth version
-    <br><input id="authv" disabled type="text" value="v1"><br> <br>
-    <br> User Name
-    <br><input id="uName" type="text" value="AUTH_salmanaccount"><br> <br>
-    <br> Continer
-    <br><input id="container" type="text" value="videos">
-    <br> <br>
-    <br> File Name
-    <br><input id="fileName" type="text" value="" placeholder="name.mp4">
-    <br> <br>
-    <input type="file" id="fileToUpload" />
-    <br> <br> Progress
-    <br> <input id="percentageCalc" disabled>
-    <br> <br>
+    <!--<a href="index2.html" target="_blank" style="color: Green;background-color: yellow;">Container Files List</a>-->
+    <div style="border-style:double">
+        <center style="border-style: double;background-color: pink"> GET Token</center>
+        </br>
+        <table>
+            <tr>
+                <th>URL</th>
+                <th>PORT</th>
+                <th>Auth version</th>
+                <th>Project</th>
+                <th>User</th>
+                <th>Password</th>
+                <th></th>
+            </tr>
+            <tr>
+                <td><input id="tokUrl" type="text" value="http://192.168.88.30"></td>
+                <td><input id="tokPort" type="text" value="5000"></td>
+                <td><input id="tokAuthv" type="text" value="v2.0/tokens"></td>
+                <td><input id="tokProj" type="text" value="swiftproject"></td>
+                <td><input id="tokUser" type="text" value="swiftuser"></td>
+                <td><input id="tokPassword" type="password" value="123a123A"></td>
+                <td> <button onclick="getTocken()" style="background-color: yellowgreen">Genarate New Token</button></td>
+            </tr>
+        </table>
+        <table>
+            <tr>
+                <th>Token</th>
+                <th>URL</th>
+            </tr>
+            <tr>
+                <td><input id="token" type="text" size="64" value="2abf11cd9ba54d949ad8f9c1f6a3b399"></td>
+                <td><input id="url" type="text" value="http://192.168.88.30:8080/v1/AUTH_7ecb817f379d4e89865219be1ac433fa" size="64"></td>
+            </tr>
+        </table>
+        </br>
+    </div>
+    </br>
+    <div style="border-style:double">
+        <table>
+            <tr>
+                <td>
+                    <center style="border-style: double;background-color: rgba(0, 128, 0, 0.38)"> Create Container</center>
+                    <br> Continer Name:
+                    <br><input id="container" type="text" value="nasrin5">
+                     <button onclick="createContainer()" style="background-color: yellowgreen">Create Container</button>
+                    <br>
+                    <br>
+                   
+                    <!--<button onclick="getContainerList()" style="background-color: red">Get This Account Container List</button>-->
+                    <button id="submit" type="button" onclick="getFileList();" style="background-color: yellow">Get Container FileList</button>
+                    <pre id="response_body"></pre>
+                    <table>
+                        <tr>
+                            <td>
+                                <table id="videoTbl"></table>
+                            </td>
+                            <td>
+                                <video id="myVideo" controls autoplay></video>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td>
+                    <center style="border-style: double;    background-color: orange;"> Upload Video</center>
+                    <table>
+                        <tr>
+                            <th>File Name</th>
+                            <th>File</th>
+                            <th>Progress</th>
+                        </tr>
+                        <tr>
+                            <td><input id="fileName" type="text" value="" placeholder="name.mp4"></td>
+                            <td><input type="file" id="fileToUpload" /></td>
+                            <td><input id="percentageCalc" disabled></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+
+    </div>
     <div id="msgBox"></div>
     <!--<a href="javascript:void(0)" onclick="doDownload()" id="dlbtn"><button>click here to download your file</button></a>-->
     <div id="some_container_div"></div>
@@ -38,13 +124,41 @@
         <pre id="response_body"></pre>
 </body>
 <script type="text/javascript">
+    function getTocken() {
+        var pass = document.getElementById('tokPassword').value;
+        var user = document.getElementById('tokUser').value;
+        var proj = document.getElementById('tokProj').value;
+
+        var url = document.getElementById('tokUrl').value + ':' +
+            document.getElementById('tokPort').value +
+            '/' + document.getElementById('tokAuthv').value;
+        console.log(url);
+        var self = this;
+        var payload = '{"auth":{"tenantName": "' + proj + '", "passwordCredentials": {"username": "' + user + '", "password": "' + pass + '"}}}';
+
+        /*
+        swift -V3 -A http://192.168.88.30:5000/v3 -U swiftproject:swiftuser -K 123a123A stat  -v
+        */
+
+        var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
+        xmlhttp.open("POST", url);
+        xmlhttp.setRequestHeader("Content-Type", "application/json");
+        xmlhttp.onreadystatechange = function (oEvent) {
+            if (xmlhttp.readyState === 4) {
+                document.getElementById('token').value = JSON.parse(xmlhttp.response).access.token.id;
+                document.getElementById('url').value = JSON.parse(xmlhttp.response).access.serviceCatalog[0].endpoints[0].internalURL;
+            }
+        }
+        xmlhttp.send(payload);
+    }
     function uploadFile(file) {
+        document.getElementById('response_headers').value = '';
         var token = document.getElementById('token').value;
-        var url = document.getElementById('url').value + ':' +
+        var url = document.getElementById('url').value/* + ':' +
             document.getElementById('port').value +
             '/' + document.getElementById('authv').value +
-            '/' + document.getElementById('uName').value +
-            '/' + document.getElementById('container').value
+            '/' + document.getElementById('uName').value +*/
+            + '/' + document.getElementById('container').value
         if (document.getElementById('fileName').value !== '')
             url += '/' + document.getElementById('fileName').value;
         else
@@ -92,7 +206,147 @@
     function transferCompleteFunction() {
         console.log('load');
     }
+    function createContainer() {
+        var token = document.getElementById('token').value;
+        var url = document.getElementById('url').value;
+        var xhrObj = new XMLHttpRequest();
+        var containerName = document.getElementById('container').value;
 
+        xhrObj.open("PUT", url + '/' + containerName, true);
+        xhrObj.setRequestHeader('X-Auth-Token', token);
+        xhrObj.onreadystatechange = function (oEvent) {
+            if (xhrObj.readyState == 4) {
+                document.getElementById('response_body').textContent = xhrObj.statusText;
+            }
+        }
+        xhrObj.send(null);
+    }
+    function getContainerList() {
+
+        var token = document.getElementById('token').value;
+        var url = document.getElementById('url').value;
+        var xhrObj = new XMLHttpRequest();
+
+        xhrObj.open("GET", url, true);
+        xhrObj.setRequestHeader('X-Auth-Token', token);
+        xhrObj.onreadystatechange = function (oEvent) {
+            if (xhrObj.readyState == 4) {
+
+            }
+        }
+        xhrObj.send();
+    }
+    function getFileList() {
+        
+        var token = document.getElementById('token').value;
+        var url = document.getElementById('url').value +
+            '/' + document.getElementById('container').value
+
+        document.getElementById('response_headers').textContent = null;
+        document.getElementById('response_body').textContent = null;
+
+        var request = new XMLHttpRequest();
+
+        request.onreadystatechange = function (oEvent) {
+            if (request.readyState == 4) {
+                responseHeaders = 'Status: ' + request.status;
+                responseHeaders = responseHeaders + '\nStatus Text: ' + request.statusText;
+                responseHeaders = responseHeaders + '\n\n' + request.getAllResponseHeaders();
+                document.getElementById('response_headers').textContent = responseHeaders;
+                // document.getElementById('response_body').textContent = request.responseText;
+                var tmpl = '<tr><th></th><th>Video Name</th><th></th><th></th></tr>';
+                var array = request.response.split('\n');
+                for (var iTb = 0; iTb < array.length; iTb++) {
+                    if (array[iTb])
+                        tmpl += '<tr>' +
+                            '<td>' + (iTb + 1) + '</td>' +
+                            '<td>' + array[iTb] + '</td>' +
+                            '<td><button  onclick=doPlay("' + array[iTb] + '")>Play</button></td>' +
+                            '<td><button class="downloadBtn" id=' + array[iTb] + ' onclick=doDownload("' + array[iTb] + '")>Download</button></td>' +
+                            '</tr>';
+                }
+                document.getElementById('videoTbl').innerHTML = tmpl;
+            }
+        }
+
+        request.open('GET', url);
+        {
+            // custom headers always trigger a pre-flight request
+            request.setRequestHeader('X-Auth-Token', token);
+        }
+        request.send(null);
+
+    }
+    function updateProgress(evt) {
+
+        if (evt.lengthComputable) {  // evt.loaded the bytes the browser received
+            // evt.total the total bytes set by the header
+            var percentComplete = Math.round(evt.loaded / evt.total * 100)
+            console.log(percentComplete);
+            //
+
+            if (percentComplete === 100) {
+                setTimeout(function () {
+                    document.getElementById(evt.currentTarget.responseURL.split('/')[6]).innerHTML = 'Download';
+                }, 1000);
+            }
+            else
+                document.getElementById(evt.currentTarget.responseURL.split('/')[6]).innerHTML = percentComplete + "%";
+
+        }
+    }
+    doDownload = function (fileName) {
+
+        var token = document.getElementById('token').value;
+        var url = document.getElementById('url').value +
+            // document.getElementById('port').value +
+            // '/' + document.getElementById('authv').value +
+            // '/' + document.getElementById('uName').value +
+            '/' + document.getElementById('container').value + '/' + fileName;
+        var xhrObj = new XMLHttpRequest();
+        xhrObj.onprogress = updateProgress;
+        xhrObj.open("GET", url, true);
+        xhrObj.setRequestHeader('X-Auth-Token', token);
+        xhrObj.onreadystatechange = function (oEvent) {
+            if (xhrObj.readyState == 4) {
+                if (oEvent.currentTarget.status === 404) {
+                    document.getElementById('response_body').textContent = xhrObj.responseText;
+                    return;
+                }
+                var blob = new Blob([oEvent.currentTarget.response], { type: "octet/stream" });
+                saveAs(blob, fileName);
+            }
+        }
+        xhrObj.responseType = "arraybuffer";
+        xhrObj.send();
+    }
+    doPlay = function (fileName) {
+
+        var token = document.getElementById('token').value;
+        var url = document.getElementById('url').value +
+            // document.getElementById('port').value +
+            // '/' + document.getElementById('authv').value +
+            // '/' + document.getElementById('uName').value +
+            '/' + document.getElementById('container').value + '/' + fileName;
+        var xhrObj = new XMLHttpRequest();
+        xhrObj.open("GET", url, true);
+        xhrObj.setRequestHeader('X-Auth-Token', token);
+        xhrObj.onreadystatechange = function (oEvent) {
+            if (xhrObj.readyState == 4) {
+                if (oEvent.currentTarget.status === 404) {
+                    document.getElementById('response_body').textContent = xhrObj.responseText;
+                    return;
+                }
+                var blob = new Blob([oEvent.currentTarget.response], { type: "octet/stream" });
+
+                var video = document.getElementById("myVideo");
+                video.src = window.URL.createObjectURL(blob);
+                //   video.src = (blob);
+            }
+        }
+        xhrObj.responseType = "arraybuffer";
+        xhrObj.send();
+    }
 
 </script>
 
