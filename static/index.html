@@ -1,5 +1,6 @@
 <html>
 <!--https://docs.openstack.org/developer/keystone/mitaka/api_curl_examples.html-->
+
 <head>
     <title>This is my curlTest</title>
     <script src="jquery-1.11.1.min.js"></script>
@@ -76,10 +77,10 @@
                     <center style="border-style: double;background-color: rgba(0, 128, 0, 0.38)"> Create Container</center>
                     <br> Continer Name:
                     <br><input id="container" type="text" value="nasrin5">
-                     <button onclick="createContainer()" style="background-color: yellowgreen">Create Container</button>
+                    <button onclick="createContainer()" style="background-color: yellowgreen">Create Container</button>
                     <br>
                     <br>
-                   
+
                     <!--<button onclick="getContainerList()" style="background-color: red">Get This Account Container List</button>-->
                     <button id="submit" type="button" onclick="getFileList();" style="background-color: yellow">Get Container FileList</button>
                     <pre id="response_body"></pre>
@@ -104,7 +105,7 @@
                         </tr>
                         <tr>
                             <td><input id="fileName" type="text" value="" placeholder="name.mp4"></td>
-                            <td><input type="file" id="fileToUpload" /></td>
+                            <td><input type="file" id="fileToUpload" accept="video/mp4" /></td>
                             <td><input id="percentageCalc" disabled></td>
                         </tr>
                     </table>
@@ -183,8 +184,7 @@
         xhrObj.send(file);
     }
 
-
-    $("#fileToUpload").bind("change", function (changeEvent) {
+    document.getElementById('fileToUpload').addEventListener("change", function (changeEvent) {
         var fr = new FileReader();
         fr.onload = (function (file_object, input_file_node) {
             if (changeEvent.target.files[0]) {
@@ -193,6 +193,15 @@
         });
         fr.readAsArrayBuffer(changeEvent.target.files[0]);
     });
+    // $("#fileToUpload").bind("change", function (changeEvent) {
+    //     var fr = new FileReader();
+    //     fr.onload = (function (file_object, input_file_node) {
+    //         if (changeEvent.target.files[0]) {
+    //             uploadFile(changeEvent.target.files[0]);
+    //         }
+    //     });
+    //     fr.readAsArrayBuffer(changeEvent.target.files[0]);
+    // });
 
     function loadStartFunction() {
         console.log('loadstart');
@@ -237,7 +246,7 @@
         xhrObj.send();
     }
     function getFileList() {
-        
+
         var token = document.getElementById('token').value;
         var url = document.getElementById('url').value +
             '/' + document.getElementById('container').value
@@ -299,7 +308,7 @@
 
         var token = document.getElementById('token').value;
         var url = document.getElementById('url').value +
-            // document.getElementById('port').value +
+            // document.getElementById('port').value +  
             // '/' + document.getElementById('authv').value +
             // '/' + document.getElementById('uName').value +
             '/' + document.getElementById('container').value + '/' + fileName;
